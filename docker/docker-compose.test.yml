@@ -4,6 +4,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    volumes:
+      - ../tests:/app/tests   
     environment:
       - NODE_ENV=test
       - PORT=3000
