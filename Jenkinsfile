@@ -69,7 +69,7 @@ pipeline {
                 script {
                     // Iniciar servicios
                     sh """
-                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d
+                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build
                     sleep 10
                     """
 
@@ -124,7 +124,7 @@ pipeline {
                 script {
                     // Levantar servicios en modo producción
                     sh """
-                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d
+                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build
                     sleep 10
                     """
 
