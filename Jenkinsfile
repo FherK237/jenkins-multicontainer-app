@@ -16,7 +16,7 @@ pipeline {
 
                 echo ' 🔧 Verificando herramientas...'
                 sh 'docker --version'
-                sh 'docker-compose version'
+                sh 'docker compose version'
                 sh 'node --version'
                 sh 'npm --version'
             }
