@@ -4,10 +4,9 @@
   "description": "Aplicación con pruebas multi-contenedor",
   "main": "src/app.js",
   "scripts": {
+    "start": "node src/app.js",
     "test:unit": "jest tests/unit",
-      
-    "test:all": "npm run test:unit && npm run test:integration",
-    "start": "node src/app.js"
+    "test:integration": "jest tests/integration --runInBand"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
