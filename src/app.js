@@ -87,5 +87,7 @@ const connectRedis = async () => {
       await connectRedis()
     })
   }
-  module.exports = { app, pool, redisClient}
+
 }
+
+module.exports = { app, pool, redisClient };
