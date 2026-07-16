@@ -91,11 +91,10 @@ app.get('/users/:id', async (req, res) => {
 
 // Iniciar servidor
 if (require.main === module) {
-  app.listen(port, async () => {
+  app.listen(port, () => {
     console.log(` 🚀 Servidor corriendo en puerto ${port}`);
-    await connectRedis();
   });
 }
 
-// El export fundamental para las pruebas
-module.exports = { app, pool, redisClient };
+// Exportamos redisClient ya inicializado
+module.exports = { app, pool, redisClient, connectRedis };
