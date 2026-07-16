@@ -16,7 +16,7 @@ pipeline {
 
                 echo ' 🔧 Verificando herramientas...'
                 sh 'docker --version'
-                sh 'docker-compose --version'
+                sh 'docker-compose version'
                 sh 'node --version'
                 sh 'npm --version'
             }
@@ -69,22 +69,22 @@ pipeline {
                 script {
                     // Iniciar servicios
                     sh """
-                    docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
+                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d
                     sleep 10
                     """
 
                     // Esperar a que los servicios estén listos
                     sh '''
                     echo "Esperando PostgreSQL..."
-                    timeout 30 sh -c "while ! docker-compose -f ${DOCKER_COMPOSE_FILE} exec postgres pg_isready; do sleep 1; done"
+                    timeout 30 sh -c "while ! docker compose -f ${DOCKER_COMPOSE_FILE} exec postgres pg_isready; do sleep 1; done"
 
                     echo "Esperando Redis..."
-                    timeout 30 sh -c "while ! docker-compose -f ${DOCKER_COMPOSE_FILE} exec redis redis-cli ping; do sleep 1; done"
+                    timeout 30 sh -c "while ! docker compose -f ${DOCKER_COMPOSE_FILE} exec redis redis-cli ping; do sleep 1; done"
                     '''
 
                     // Ejecutar pruebas de integración dentro del contenedor app
                     sh """
-                    docker-compose -f ${DOCKER_COMPOSE_FILE} exec -T app npm run test:integration -- --coverage
+                    docker compose -f ${DOCKER_COMPOSE_FILE} exec -T app npm run test:integration -- --coverage
                     """
                 }
             }
@@ -101,7 +101,7 @@ pipeline {
                     ])
 
                     echo ' 🧹 Limpiando contenedores...'
-                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} down -v"
+                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} down -v"
                 }
                 failure {
                     echo ' ❌ Pruebas de integración fallaron. Revisa los logs.'
@@ -119,7 +119,7 @@ pipeline {
                 script {
                     // Levantar servicios en modo producción
                     sh """
-                    docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
+                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d
                     sleep 10
                     """
 
@@ -134,7 +134,7 @@ pipeline {
             }
             post {
                 always {
-                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} down -v"
+                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} down -v"
                 }
             }
         }
@@ -166,8 +166,10 @@ pipeline {
             )
         }
         always {
-            echo ' 🧹 Limpiando workspace...'
-            cleanWs()
+            node('docker') {
+                echo ' 🧹 Limpiando workspace...'
+                cleanWs()
+            }
         }
     }
 }
