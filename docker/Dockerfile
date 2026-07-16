@@ -2,7 +2,7 @@ FROM node:18-alpine
 WORKDIR /app
 #Instalardependencias
 COPY package*.json ./
-RUN nom ci --only-production
+RUN npm ci --only-production
 # Copiar codigo fuente
 COPY src/ ./src/
 #Exponer puerto
