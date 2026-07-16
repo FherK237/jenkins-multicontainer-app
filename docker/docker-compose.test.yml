@@ -29,7 +29,7 @@ services:
       - POSTGRES_USER=testuser
       - POSTGRES_PASSWORD=testpass
     ports:
-      - "5432:5432"
+      - "5433:5432" # <-- Cambiamos el puerto expuesto al host
     networks:
       - test-network
 
