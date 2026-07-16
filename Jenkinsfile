@@ -101,7 +101,7 @@ pipeline {
                     ])
 
                     echo ' 🧹 Limpiando contenedores...'
-                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} down -v"
+                    sh 'docker compose -f docker/docker-compose.test.yml exec -T app npm run test:integration -- --coverage --passWithNoTests'
                 }
                 failure {
                     echo ' ❌ Pruebas de integración fallaron. Revisa los logs.'
