@@ -128,10 +128,11 @@ pipeline {
                     sleep 10
                     """
 
-                    // Probar endpoints reales
+                    // Probar endpoints reales desde adentro del contenedor
                     sh """
-                    curl -f http://localhost:3000/health || exit 1
-                    curl -X POST http://localhost:3000/users \\
+                    docker compose -f ${DOCKER_COMPOSE_FILE} exec -T app curl -f http://localhost:3000/health || exit 1
+                    
+                    docker compose -f ${DOCKER_COMPOSE_FILE} exec -T app curl -X POST http://localhost:3000/users \\
                         -H "Content-Type: application/json" \\
                         -d '{"name":"E2E Test","email":"e2e@test.com"}' || exit 1
                     """
