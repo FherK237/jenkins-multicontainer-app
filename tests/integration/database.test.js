@@ -1,8 +1,11 @@
 const request = require('supertest');
-const { app, pool, redisClient } = require('../../src/app');
+const { app, pool, redisState, connectRedis } = require('../../src/app');
 
 describe('Pruebas de Integración con Servicios', () => {
   beforeAll(async () => {
+    // Conectar a Redis antes de ejecutar las pruebas
+    await connectRedis();
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -15,12 +18,16 @@ describe('Pruebas de Integración con Servicios', () => {
   afterAll(async () => {
     await pool.query('DROP TABLE IF EXISTS users');
     await pool.end();
-    if (redisClient) { await redisClient.quit(); }
+    if (redisState.client && redisState.client.isReady) {
+      await redisState.client.quit();
+    }
   });
 
   beforeEach(async () => {
     await pool.query('DELETE FROM users');
-    if (redisClient) { await redisClient.flushAll(); }
+    if (redisState.client && redisState.client.isReady) {
+      await redisState.client.flushAll();
+    }
   });
 
   test('POST /users - Crear usuario en PostgreSQL', async () => {

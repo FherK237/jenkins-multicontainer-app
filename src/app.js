@@ -15,14 +15,16 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'testpass',
 });
 
-// Configuración de Redis
-let redisClient = null;
+// Configuración de Redis - usar objeto para que la referencia se comparta
+const redisState = { client: null };
+
 const connectRedis = async () => {
   try {
-    redisClient = redis.createClient({
+    const client = redis.createClient({
       url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`
     });
-    await redisClient.connect();
+    await client.connect();
+    redisState.client = client;
     console.log(' ✅ Conectado a Redis');
   } catch (error) {
     console.error(' ❌ Error conectando a Redis:', error.message);
@@ -39,7 +41,7 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       postgres: pool ? 'connected' : 'disconnected',
-      redis: redisClient?.isReady || false
+      redis: redisState.client?.isReady || false
     }
   });
 });
@@ -63,9 +65,11 @@ app.get('/users/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const cachedUser = await redisClient.get(`user:${userId}`);
-    if (cachedUser) {
-      return res.json({ source: 'cache', data: JSON.parse(cachedUser) });
+    if (redisState.client && redisState.client.isReady) {
+      const cachedUser = await redisState.client.get(`user:${userId}`);
+      if (cachedUser) {
+        return res.json({ source: 'cache', data: JSON.parse(cachedUser) });
+      }
     }
   } catch (error) {
     console.error('Error en Redis:', error.message);
@@ -78,7 +82,9 @@ app.get('/users/:id', async (req, res) => {
     }
 
     try {
-      await redisClient.set(`user:${userId}`, JSON.stringify(result.rows[0]));
+      if (redisState.client && redisState.client.isReady) {
+        await redisState.client.set(`user:${userId}`, JSON.stringify(result.rows[0]));
+      }
     } catch (error) {
       console.error('Error guardando en Redis:', error.message);
     }
@@ -91,10 +97,11 @@ app.get('/users/:id', async (req, res) => {
 
 // Iniciar servidor
 if (require.main === module) {
-  app.listen(port, () => {
-    console.log(` 🚀 Servidor corriendo en puerto ${port}`);
+  connectRedis().then(() => {
+    app.listen(port, () => {
+      console.log(` 🚀 Servidor corriendo en puerto ${port}`);
+    });
   });
 }
 
-// Exportamos redisClient ya inicializado
-module.exports = { app, pool, redisClient, connectRedis };
+module.exports = { app, pool, redisState, connectRedis };
