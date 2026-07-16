@@ -86,6 +86,11 @@ pipeline {
                     sh """
                     docker compose -f ${DOCKER_COMPOSE_FILE} exec -T app npm run test:integration -- --coverage --passWithNoTests
                     """
+                    
+                    // NUEVO: Extraer la carpeta coverage del contenedor hacia el workspace de Jenkins
+                    sh """
+                    docker compose -f ${DOCKER_COMPOSE_FILE} cp app:/app/coverage ./coverage || true
+                    """
                 }
             }
             post {

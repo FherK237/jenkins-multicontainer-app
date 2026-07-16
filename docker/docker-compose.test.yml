@@ -4,10 +4,6 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    volumes:
-      - ../tests:/app/tests   
-      - ..:/app            # Monta todo el proyecto local en la carpeta /app del contenedor
-      - /app/node_modules
     environment:
       - NODE_ENV=test
       - PORT=3000
